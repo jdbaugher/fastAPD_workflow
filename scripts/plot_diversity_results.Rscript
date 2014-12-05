@@ -54,14 +54,14 @@ plot.div <- function (treatment,ctrl,stocks,treatment.means,ctrl.means,
     geom_line(data=ctrl.means[which(ctrl.means$Lab==2),],
       aes(Passage, Mean),linetype="dotted",color="black") + 
     geom_point(data=ctrl.means[which(ctrl.means$Lab==2),],
-      aes(Passage, Mean),size=5.5,color="black",pch=24,bg="white")  +
+      aes(Passage, Mean),size=5.5,color="black",pch=21,bg="white")  +
      
     geom_errorbar(data=ctrl.means[which(ctrl.means$Lab==1),], 
       aes(ymin = Mean - SD, ymax = Mean + SD), width=0.4, color="black") +
     geom_line(data=ctrl.means[which(ctrl.means$Lab==1),],
       aes(Passage, Mean),linetype="dotted",color="black") + 
     geom_point(data=ctrl.means[which(ctrl.means$Lab==1),],
-      aes(Passage, Mean),size=6,color="black",pch=21,bg="white")  +
+      aes(Passage, Mean),size=6,color="black",pch=24,bg="white")  +
      
     geom_errorbar(data=treatment.means[which(treatment.means$Lab==2),], 
       aes(ymin = Mean - SD, ymax = Mean + SD), width=0.4, color="black") +
@@ -78,7 +78,7 @@ plot.div <- function (treatment,ctrl,stocks,treatment.means,ctrl.means,
       aes(Passage, Mean),size=6,color="black",pch=17)  +
      
     scale_x_continuous("Passage") + 
-    scale_y_continuous("", limits=c(-0.02, 0.12)) +
+    scale_y_continuous("", limits=c(-0.02, 0.15)) +
     #scale_y_discrete(limits=c(-0.02, 0.10),"Nucleotide Diversity (%)") +
     theme_bw() + # make the theme black-and-white rather than grey 
     ggtitle(paste("Amplicon", amp.number)) +
@@ -94,7 +94,7 @@ plot.div <- function (treatment,ctrl,stocks,treatment.means,ctrl.means,
 
     legend(-0.17,1.19, c("Lab 1 (Treatment)","Lab 1 (Control)", 
       "Lab 2 (Treatment)","Lab 2 (Control)", "MNV1 Stock"), 
-      pch=c(17,2,16,1,15),pt.cex=c(2,2,2.25,2.25,2),
+      pch=c(17,2,16,1,15),pt.cex=c(1.75,1.75,2,2,1.75),
       lty=c(0,0,0,0,0), lwd=c(2,2,2,2,2), cex=1.4,
       col=c("black","black","black","black","black"))
     mtext(side = 2, "Nucleotide Diversity (%)", line = 2.75, las=0, cex = 1.5, adj=0.8)
@@ -126,8 +126,8 @@ assign.passage <- function (data.name,passage,offset) {
 
 plot.by.amplicon <- function (data.name,amp.number) {
   
-  # N_reads must be greater than 100
-  curr.data<-data.name[which(data.name$N_reads >= 50),]
+  # N_Reads must be >= 50
+  curr.data<-data.name[which(data.name$N_Reads >= 50),]
   curr.data<-curr.data[which(curr.data$Amplicon == amp.number),]
   treatment.means<-data.frame(Lab=character(0),Passage=numeric(0),
     Mean=numeric(0),SD=numeric(0))
