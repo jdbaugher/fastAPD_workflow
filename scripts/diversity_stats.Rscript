@@ -1,0 +1,100 @@
+#!/usr/bin/Rscript
+# diversity_stats.Rscript
+# Author: Joseph D. Baugher, <jbaughe2(at)jhmi.edu>
+# Copyright (c) 2014 Joseph D. Baugher
+
+
+diversity <- read.delim(file="diversity_results.txt",header=T,stringsAsFactors=F)
+diversity$fastAPD = as.numeric(diversity$fastAPD) * 100
+diversity$Std_Err = as.numeric(diversity$Std_Err) * 100
+
+diversity2<-diversity[which(diversity$Passage!=0),]
+diversity2$P5<-rep(NA,length(diversity2$ID))
+diversity2$P10<-rep(NA,length(diversity2$ID))
+diversity2$P15<-rep(NA,length(diversity2$ID))
+diversity2$P20<-rep(NA,length(diversity2$ID))
+
+for(i in 1:max(diversity2$Replicate)) {
+  for(j in c(2,3,4)) {
+    for(k in c(1,2)) {
+      for(l in c("C","T")) {
+        diversity2$P5[which(diversity2$Replicate==i & diversity2$Amplicon==j & 
+          diversity2$Lab==k & diversity2$Group==l & diversity2$Passage==5)] <- 
+          diversity2$fastAPD[which(diversity2$Replicate==i & diversity2$Amplicon==j & 
+          diversity2$Lab==k & diversity2$Group==l & diversity2$Passage==5)]
+
+        diversity2$P10[which(diversity2$Replicate==i & diversity2$Amplicon==j & 
+          diversity2$Lab==k & diversity2$Group==l & diversity2$Passage==5)] <- 
+          diversity2$fastAPD[which(diversity2$Replicate==i & diversity2$Amplicon==j & 
+          diversity2$Lab==k & diversity2$Group==l & diversity2$Passage==10)]
+
+        diversity2$P15[which(diversity2$Replicate==i & diversity2$Amplicon==j & 
+          diversity2$Lab==k & diversity2$Group==l & diversity2$Passage==5)] <- 
+          diversity2$fastAPD[which(diversity2$Replicate==i & diversity2$Amplicon==j & 
+          diversity2$Lab==k & diversity2$Group==l & diversity2$Passage==15)]
+
+        if(length(diversity2$fastAPD[which(diversity2$Replicate==i & diversity2$Amplicon==j & 
+           diversity2$Lab==k & diversity2$Group==l & diversity2$Passage==20)])>0) {
+           diversity2$P20[which(diversity2$Replicate==i & diversity2$Amplicon==j & 
+             diversity2$Lab==k & diversity2$Group==l & diversity2$Passage==5)] <- 
+             diversity2$fastAPD[which(diversity2$Replicate==i & diversity2$Amplicon==j & 
+             diversity2$Lab==k & diversity2$Group==l & diversity2$Passage==20)]
+        }
+      }
+    }
+  }
+}
+
+diversity2<-diversity2[which(diversity2$Passage==5),]   
+diversity2$D1<-rep(NA,length(diversity2$ID))
+diversity2$D2<-rep(NA,length(diversity2$ID))
+diversity2$D3<-rep(NA,length(diversity2$ID))
+
+for(i in 1:length(diversity2$ID)) {
+  diversity2$D1[i]<-as.numeric(diversity2$P10[i])-as.numeric(diversity2$P5[i])
+  diversity2$D2[i]<-as.numeric(diversity2$P15[i])-as.numeric(diversity2$P10[i])
+  if(!is.na(diversity2$P20[i])) {diversity2$D3[i]<-as.numeric(diversity2$P20[i])-as.numeric(diversity2$P15[i])}
+}
+
+d1.t<-diversity2$D1[which(diversity2$Group=='T')]
+d2.t<-diversity2$D2[which(diversity2$Group=='T')]
+d3.t<-diversity2$D3[which(diversity2$Group=='T' & !is.na(diversity2$D3))]
+
+d1.c<-diversity2$D1[which(diversity2$Group=='C')]
+d2.c<-diversity2$D2[which(diversity2$Group=='C')]
+d3.c<-diversity2$D3[which(diversity2$Group=='C' & !is.na(diversity2$D3))]
+
+all.d.t<-c(d1.t,d2.t,d3.t)
+all.d.c<-c(d1.c,d2.c,d3.c)
+
+
+########### Print results to file #############
+sink("diversity_stats.txt")
+
+cat("Diversity Stats/n/n")
+
+cat("mean test\n")
+cat(mean(all.d.t))
+cat("\nmean ctrl\n")
+cat(mean(all.d.c))
+
+cat("\n\nstd_err test\n")
+se.t <- sd(all.d.t)/sqrt(length(all.d.t))
+cat(se.t)
+ 
+cat("\nstd_err ctrl\n")
+se.c <- sd(all.d.c)/sqrt(length(all.d.c))
+cat(se.c)
+
+cat("\n\none-sample wilcox test\n")
+w.t <- capture.output(wilcox.test(all.d.t))
+cat(w.t)
+
+cat("\n\none-sample wilcox ctrl\n")
+w.c <- capture.output(wilcox.test(all.d.c))
+cat(w.c)
+
+cat("\n\ntwo-sample wilcox test and ctrl\n")
+w.tc <- capture.output(wilcox.test(all.d.t,all.d.c))
+cat(w.tc)
+sink()
