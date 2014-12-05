@@ -1,0 +1,203 @@
+#!/usr/bin/Rscript
+# plot_diversity_results.Rscript
+# author: Joseph D. Baugher, <jbaughe2(at)jhmi.edu>
+# Copyright © 2014 Joseph D. Baugher
+
+suppressMessages(library(ggplot2))
+
+#-----------------------------
+# Functions
+#-----------------------------
+
+plot.div <- function (treatment,ctrl,stocks,treatment.means,ctrl.means,
+                      init.line,amp.number) { 
+                      
+  # Prepare data                     
+  treatment$fastAPD<-as.numeric(treatment$fastAPD)
+  ctrl$fastAPD<-as.numeric(ctrl$fastAPD)
+  stocks$fastAPD<-as.numeric(stocks$fastAPD)
+  treatment$Std_Err<-as.numeric(treatment$Std_Err)
+  ctrl$Std_Err<-as.numeric(ctrl$Std_Err)
+  stocks$Std_Err<-as.numeric(stocks$Std_Err)
+  treatment$Passage<-as.numeric(treatment$Passage)
+  ctrl$Passage<-as.numeric(ctrl$Passage)
+  stocks$Passage<-as.numeric(stocks$Passage)
+  stock_error = mean(stocks$Std_Err)
+  stock_div = mean(stocks$fastAPD)
+
+
+  pdf(file=paste("Ribavirin_Diversity_Amplicon", amp.number, ".pdf",sep=""),
+                 width=6.5,height=6)
+
+  f1 <- ggplot(data = ctrl.means,aes(Passage,Mean)) + 
+    geom_line(data=init.line[which(init.line$Lab==2 
+      & init.line$Group=="C"),],linetype="dotted",color="black") +
+    geom_line(data=init.line[which(init.line$Lab==2 
+      & init.line$Group=="T"),],linetype="dotted",color="black") +
+    geom_line(data=init.line[which(init.line$Lab==1 
+      & init.line$Group=="C"),],linetype="dotted",color="black") +
+    geom_line(data=init.line[which(init.line$Lab==1 
+      & init.line$Group=="T"),],linetype="dotted",color="black") +
+
+    geom_point(data=ctrl[which(ctrl$Lab==2),],aes(Passage, fastAPD),
+      size=4.5,color="gray48",pch=1)  +
+    geom_point(data=ctrl[which(ctrl$Lab==1),],aes(Passage, fastAPD),
+      size=5,color="gray88",pch=2)  +
+    geom_point(data=treatment[which(treatment$Lab==2),],aes(Passage, fastAPD),
+      size=4.5,color="gray88",pch=16)  +
+    geom_point(data=treatment[which(treatment$Lab==1),],aes(Passage, fastAPD),
+      size=5,color="gray88",pch=17)  +
+    geom_point(data=stocks,aes(Passage, fastAPD),size=5,color="gray88",pch=15) +
+
+    geom_errorbar(data=ctrl.means[which(ctrl.means$Lab==2),],
+      aes(ymin = Mean - SD,ymax = Mean + SD), width=0.4, color="black") +
+    geom_line(data=ctrl.means[which(ctrl.means$Lab==2),],
+      aes(Passage, Mean),linetype="dotted",color="black") + 
+    geom_point(data=ctrl.means[which(ctrl.means$Lab==2),],
+      aes(Passage, Mean),size=5.5,color="black",pch=24,bg="white")  +
+     
+    geom_errorbar(data=ctrl.means[which(ctrl.means$Lab==1),], 
+      aes(ymin = Mean - SD, ymax = Mean + SD), width=0.4, color="black") +
+    geom_line(data=ctrl.means[which(ctrl.means$Lab==1),],
+      aes(Passage, Mean),linetype="dotted",color="black") + 
+    geom_point(data=ctrl.means[which(ctrl.means$Lab==1),],
+      aes(Passage, Mean),size=6,color="black",pch=21,bg="white")  +
+     
+    geom_errorbar(data=treatment.means[which(treatment.means$Lab==2),], 
+      aes(ymin = Mean - SD, ymax = Mean + SD), width=0.4, color="black") +
+    geom_line(data=treatment.means[which(treatment.means$Lab==2),],
+      aes(Passage, Mean),linetype="dotted",color="black") + 
+    geom_point(data=treatment.means[which(treatment.means$Lab==2),],
+      aes(Passage, Mean),size=5.5,color="black",pch=16)  +
+     
+    geom_errorbar(data=treatment.means[which(treatment.means$Lab==1),], 
+      aes(ymin = Mean - SD, ymax = Mean + SD), width=0.4, color="black") +
+    geom_line(data=treatment.means[which(treatment.means$Lab==1),],
+      aes(Passage, Mean),linetype="dotted",color="black") + 
+    geom_point(data=treatment.means[which(treatment.means$Lab==1),],
+      aes(Passage, Mean),size=6,color="black",pch=17)  +
+     
+    scale_x_continuous("Passage") + 
+    scale_y_continuous("", limits=c(-0.02, 0.12)) +
+    #scale_y_discrete(limits=c(-0.02, 0.10),"Nucleotide Diversity (%)") +
+    theme_bw() + # make the theme black-and-white rather than grey 
+    ggtitle(paste("Amplicon", amp.number)) +
+    theme(  
+      panel.grid.minor = element_blank(), # switch off minor gridlines
+      panel.grid.major = element_blank(), # switch off major gridlines
+      text = element_text(size=18)
+    )
+
+    plot.new()
+    par(mfrow=c(1,1), oma = c(1,4,2,0) + 0.1, mar = c(1.3,0,1,1) + 0.1)
+    plot(f1, newpage = F)
+
+    legend(-0.17,1.19, c("Lab 1 (Treatment)","Lab 1 (Control)", 
+      "Lab 2 (Treatment)","Lab 2 (Control)", "MNV1 Stock"), 
+      pch=c(17,2,16,1,15),pt.cex=c(2,2,2.25,2.25,2),
+      lty=c(0,0,0,0,0), lwd=c(2,2,2,2,2), cex=1.4,
+      col=c("black","black","black","black","black"))
+    mtext(side = 2, "Nucleotide Diversity (%)", line = 2.75, las=0, cex = 1.5, adj=0.8)
+
+  trash <- dev.off()
+}
+
+assign.passage <- function (data.name,passage,offset) {
+  num.samples <- length(which(data.name$Passage == passage))
+  passage<-passage+offset
+  passage.spread <- NULL
+  if(num.samples < 1) {return(passage.spread)}
+  if(num.samples %% 2 == 0) {
+    passage.spread <- seq(passage+0.2, passage+(num.samples/2)*0.2,0.2)
+    passage.spread <- c(passage.spread,seq(passage-0.2, 
+      passage-(num.samples/2)*0.2,-0.2))    
+  }
+  if(num.samples %% 2 > 0) {
+    passage.spread <- passage
+    if(num.samples > 1) {
+      passage.spread <- c(passage.spread,seq(passage+0.2, 
+        passage+((num.samples-1)/2)*0.2,0.2))
+      passage.spread <- c(passage.spread,seq(passage-0.2, 
+        passage-((num.samples-1)/2)*0.2,-0.2))
+    }    
+  }  
+  return(passage.spread)
+}
+
+plot.by.amplicon <- function (data.name,amp.number) {
+  
+  # N_reads must be greater than 100
+  curr.data<-data.name[which(data.name$N_reads >= 50),]
+  curr.data<-curr.data[which(curr.data$Amplicon == amp.number),]
+  treatment.means<-data.frame(Lab=character(0),Passage=numeric(0),
+    Mean=numeric(0),SD=numeric(0))
+  init.line<-data.frame(Lab=character(0),Passage=numeric(0),
+  Mean=numeric(0),Group=character(0))
+  treatment<-curr.data[which(curr.data$Group == "T"),]
+
+  for(i in seq(5,20,5)) {
+    w_indices = which(treatment$Passage == i & treatment$Lab == 2)
+    s_indices = which(treatment$Passage == i & treatment$Lab == 1)
+    
+    treatment$Passage[w_indices] <- 
+      assign.passage(treatment[which(treatment$Lab == 2),],i,0.6)
+    treatment$Passage[s_indices] <-
+      assign.passage(treatment[which(treatment$Lab == 1),],i,-0.6)
+    if(i==5){min<-"yes"}
+    treatment.means<-rbind(treatment.means, data.frame(Lab=2,
+      Passage=i+0.6, Mean=mean(treatment$fastAPD[w_indices]),
+      SD=sd(treatment$fastAPD[w_indices])))
+    treatment.means<-rbind(treatment.means, data.frame(Lab=1,
+      Passage=i-0.6, Mean=mean(treatment$fastAPD[s_indices]),
+      SD=sd(treatment$fastAPD[s_indices])))
+    if(i==5){
+      init.line<-rbind(init.line, data.frame(Lab=rep(2,2),Passage=c(0,5+0.6),
+        Mean=mean(treatment$fastAPD[w_indices]),Group=rep("T",2)))
+      init.line<-rbind(init.line, data.frame(Lab=rep(1,2),Passage=c(0,5-0.6),
+        Mean=mean(treatment$fastAPD[s_indices]),Group=rep("T",2)))
+    }      
+  }
+        
+  ctrl.means<-data.frame(Lab=character(0),Passage=numeric(0),
+    Mean=numeric(0),SD=numeric(0))
+  ctrl<-curr.data[which(curr.data$Group == "C"),]
+  for(i in seq(5,20,5)) {
+    w_indices = which(ctrl$Passage == i & ctrl$Lab == 2)
+    s_indices = which(ctrl$Passage == i & ctrl$Lab == 1)
+
+    ctrl$Passage[w_indices] <- 
+      assign.passage(ctrl[which(ctrl$Lab == 2),],i,0.6)
+    ctrl$Passage[s_indices] <- 
+      assign.passage(ctrl[which(ctrl$Lab == 1),],i,-0.6)
+    ctrl.means<-rbind(ctrl.means, data.frame(Lab=2,Passage=i+0.4,
+      Mean=mean(ctrl$fastAPD[w_indices]),SD=sd(ctrl$fastAPD[w_indices])))
+    ctrl.means<-rbind(ctrl.means, data.frame(Lab=1,Passage=i-0.4,
+      Mean=mean(ctrl$fastAPD[s_indices]),SD=sd(ctrl$fastAPD[s_indices])))
+    if(i==5){
+      init.line<-rbind(init.line, data.frame(Lab=rep(2,2),Passage=c(0,5+0.6),
+        Mean=mean(ctrl$fastAPD[w_indices]),Group=rep("C",2)))
+      init.line<-rbind(init.line, data.frame(Lab=rep(1,2),Passage=c(0,5-0.6),
+        Mean=mean(ctrl$fastAPD[s_indices]),Group=rep("C",2)))
+    }
+  }
+
+  stocks<-curr.data[which(curr.data$Group == "S"),]
+  stocks$Passage<-assign.passage(stocks,0,0)
+
+  plot.div(treatment, ctrl, stocks, treatment.means,ctrl.means,init.line,
+    amp.number)
+}
+
+
+#----------------------------
+# Main 
+#----------------------------
+
+diversity <- read.delim(file="diversity_results.txt",header=T,stringsAsFactors=F)
+diversity$fastAPD = as.numeric(diversity$fastAPD) * 100
+diversity$Std_Err = as.numeric(diversity$Std_Err) * 100
+diversity$Group[which(diversity$Passage==0)]<-"S"
+
+plot.by.amplicon(diversity,2)
+plot.by.amplicon(diversity,3)
+plot.by.amplicon(diversity,4)
