@@ -1,7 +1,7 @@
 fastAPD_workflow
 ================
 
-### Performs fast nucleotide diversity calculations.
+### Nucleotide diversity (average pairwise difference) workflow
 
 This workflow makes use of the Bio::fastAPD Perl module for fast calculations
 of nucleotide diversity (average pairwise difference (APD)) from 
