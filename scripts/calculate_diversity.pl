@@ -93,6 +93,17 @@ print join("\t", qw/ID Lab Amplicon Group Passage Replicate
         /(\d)$/;
         my $replicate = $1;            
         
+        ######## Mask positions with outlier mutation rates
+        my $mask;
+        if ($amplicon == 2) {$mask = (1 x 420)}
+        elsif ($amplicon == 3) {
+            # Exclude Amp3 positions 11 and 292
+            $mask = join("", (1 x 10),0,(1 x (291-11)),0,(1 x (376-292)));
+        }
+        elsif ($amplicon == 4) {
+            # Exclude Amp4 positions 326, 361, 393
+            $mask = join("",(1 x 325),0,(1 x (360-326)),0,(1 x (392-361)),0,(1 x (397-393)));
+        }
 
         #################### Perform Calculations #################
 
@@ -100,7 +111,8 @@ print join("\t", qw/ID Lab Amplicon Group Passage Replicate
         my $sequences_ref = create_seq_array($ifile);   
 	my $fastAPD_obj = Bio::fastAPD->new();
         $fastAPD_obj->initialize(seq_array_ref => $sequences_ref,
-                                 alphabet      => 'dna');
+                                 alphabet      => 'dna'
+                                 mask          => $mask);
                                  
         # Perform calculations                         
         my $apd = $fastAPD_obj->calculate_diversity(method  => 'fast_apd',
