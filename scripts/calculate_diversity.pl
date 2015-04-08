@@ -1,14 +1,14 @@
 #!/usr/bin/env perl -w
 # calculate_diversity.pl
-# Author: Joseph D. Baugher, <jbaughe2(at)jhmi.edu>
-# Copyright (c) 2014 Joseph D. Baugher
+# Author: Joseph D. Baugher, <joebaugher(at)hotmail.com>
+# Copyright (c) 2014,2015 Joseph D. Baugher
 
 use strict;
 use Getopt::Long;
 use File::chdir;
 use File::Spec;
 
-use Bio::fastAPD;
+use Bio::fastAPD; #v1.10.0 or higher
 
 my $input_dir = "./";
 my $glob      = "*";
@@ -115,10 +115,8 @@ print join("\t", qw/ID Lab Amplicon Group Passage Replicate
                                  mask          => $mask);
                                  
         # Perform calculations                         
-        my $apd = $fastAPD_obj->calculate_diversity(method  => 'fast_apd',
-                                            	    compare => 'gap_base');                                      
-        my $std_err = $fastAPD_obj->calculate_apd_std_err(method  => 'fast_apd',
-                                                  	  compare => 'gap_base');                          
+        my $apd           = $fastAPD_obj->apd('gap_base');                                      
+        my $std_err       = $fastAPD_obj->std_err('gap_base');                          
         my $num_reads     = $fastAPD_obj->n_reads;                                      
         my $num_positions = $fastAPD_obj->width; 
           

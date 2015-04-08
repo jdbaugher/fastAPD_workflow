@@ -1,15 +1,15 @@
 #!/bin/bash
 #######################
 # nucleotide_diversity.sh
-# Author: Joseph D. Baugher, jbaughe2(at)jhmi.edu
-# Copyright © 2014 Joseph D. Baugher
+# Author: Joseph D. Baugher, joebaugher(at)hotmail.com
+# Copyright © 204, 2015 Joseph D. Baugher
 #######################
 #$ -N nucleotide_diversity
 #$ -cwd
 #$ -S /bin/bash 
 #######################
 
-# If starting with haplotypes, they must expanded based on the number of reads 
+# If starting with haplotypes, they must be expanded based on the number of reads 
 # represented by each haplotype. Otherwise, skip this step.
 echo "Running Step 1 - haplotype expansion..."
 perl scripts/expand_haplotypes.pl --input_dir $1 --glob *genotypes.sig.txt

@@ -1,6 +1,6 @@
 #!/usr/bin/Rscript
 # plot_diversity_results.Rscript
-# author: Joseph D. Baugher, <jbaughe2(at)jhmi.edu>
+# author: Joseph D. Baugher, <joebaugher(at)hotmail.com>
 # Copyright © 2014 Joseph D. Baugher
 
 suppressMessages(library(ggplot2))

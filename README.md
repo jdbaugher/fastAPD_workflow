@@ -6,16 +6,14 @@ fastAPD_workflow
 This workflow makes use of the Bio::fastAPD Perl module for fast calculations
 of nucleotide diversity (average pairwise difference (APD)) from 
 multiple sequence alignments. The workflow accompanies an upcoming peer-reviewed 
-journal article. The analysis results can be replicated using the haplotype data 
-(*genotypes.sig.txt) available at ????. Additional details will be provided as 
-they become available.
+journal article. Additional details will be provided as they become available.
 
 ## Requirements
 This workflow has been tested on MACOSX and linux operating systems
 using recent versions of Perl, R, and X11.
 
 #### Perl modules:
-    Bio::fastAPD
+    Bio::fastAPD v1.10.0 or higher
 #### R libraries:
     ggplot2
 
@@ -37,8 +35,8 @@ has finished. If no errors are reported, the analysis is complete.
 ## Authors
 
 Joseph D. Baugher, Ph.D. and Fernando J. Pineda, Ph.D.<br>
-Copyright (c) 2014 Joseph D. Baugher, Ph.D.
+Copyright (c) 2014,2015 Joseph D. Baugher, Ph.D.
 
 ## Maintainer
 
-Joseph D. Baugher, Ph.D., jbaughe2(at)jhmi.edu
+Joseph D. Baugher, Ph.D., joebaugher(at)hotmail.com
